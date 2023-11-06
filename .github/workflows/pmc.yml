@@ -1,0 +1,22 @@
+name: PMC WordPress Workflows
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+
+jobs:
+  coding-standards:
+    name: Coding Standards
+    uses: penske-media-corp/github-workflows-wordpress/.github/workflows/coding-standards.yml@main
+    secrets:
+      BITBUCKET_READ_ONLY_SSH_KEY: ${{ secrets.BITBUCKET_READ_ONLY_SSH_KEY }}
+      GITHUB_READ_ONLY_SSH_KEY: ${{ secrets.PMC_GITHUB_ACTION_SSH_KEY }}
+
+  linting:
+    name: Linting
+    uses: penske-media-corp/github-workflows-wordpress/.github/workflows/linting.yml@main
+    secrets:
+      BITBUCKET_READ_ONLY_SSH_KEY: ${{ secrets.BITBUCKET_READ_ONLY_SSH_KEY }}
+      GITHUB_READ_ONLY_SSH_KEY: ${{ secrets.PMC_GITHUB_ACTION_SSH_KEY }}
