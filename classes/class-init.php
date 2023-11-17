@@ -186,5 +186,4 @@ final class Init extends PMC_WP_CLI {
 
 		return array_merge( $query_args, $additional_instances );
 	}
-
 }
