@@ -49,7 +49,11 @@ final class Nav_Menu_Item extends Query_Args {
 		}
 
 		$ids[] = [
-			'ID'        => get_post_meta( $id, '_menu_item_object_id', true ),
+			'ID'        => (int) get_post_meta(
+				$id,
+				'_menu_item_object_id',
+				true
+			),
 			'post_type' => get_post_type( $id ),
 		];
 

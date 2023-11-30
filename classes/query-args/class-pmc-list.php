@@ -49,14 +49,14 @@ final class PMC_List extends Query_Args {
 	public static function get_linked_ids( int $id, string $post_type ): array {
 		$ids = [];
 
-		$list_items = Lists::get_instance()->get_all_list_items_sorted( $id );
+		$list_items = Lists::get_instance()->get_sorted_list_item_ids( $id );
 		foreach ( $list_items as $item ) {
 			$ids[] = [
-				'ID'        => $item->ID,
-				'post_type' => $item->post_type,
+				'ID'        => $item,
+				'post_type' => get_post_type( $item ),
 			];
 
-			self::_add_thumbnail_id( $ids, $item->ID );
+			self::_add_thumbnail_id( $ids, $item );
 		}
 
 		return $ids;

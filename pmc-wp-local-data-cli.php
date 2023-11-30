@@ -4,7 +4,7 @@
  * Plugin URI:        https://pmc.com/
  * Description:       WP-CLI commands to trim production database backup for local development.
  * Version:           0.1.0
- * Requires at least: 6.3
+ * Requires at least: 6.2
  * Requires PHP:      8.2
  * Text Domain:       pmc-wp-local-data-cli
  *
