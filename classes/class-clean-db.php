@@ -49,12 +49,12 @@ final class Clean_DB {
 		$page     = 0;
 		$per_page = 250;
 
+		$total_batches = ceil( $total_ids / $per_page );
+
 		WP_CLI::line(
 			sprintf(
 				'   Expecting %1$s batches',
-				number_format(
-					ceil( $total_ids / $per_page )
-				)
+				number_format( $total_batches )
 			)
 		);
 
@@ -72,7 +72,7 @@ final class Clean_DB {
 					'   > Processing batch %1$s (%2$d%%)',
 					number_format( $page + 1 ),
 					round(
-						( $page + 1 ) / $total_ids * 100
+						( $page + 1 ) / $total_batches * 100
 					)
 				)
 			);
