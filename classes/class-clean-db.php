@@ -67,7 +67,15 @@ final class Clean_DB {
 		while (
 			$ids = $wpdb->get_col( $this->_get_delete_query( $page, $per_page ) )
 		) {
-			WP_CLI::line( '   > Processing batch ' . $page );
+			WP_CLI::line(
+				sprintf(
+					'   > Processing batch %1$s (%2$d%%)',
+					number_format( $page + 1 ),
+					round(
+						( $page + 1 ) / $total_ids * 100
+					)
+				)
+			);
 
 			$to_delete = array_diff( $ids, $to_keep );
 
