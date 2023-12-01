@@ -43,10 +43,20 @@ final class Clean_DB {
 		WP_CLI::line( ' * Starting post deletion. This will take a while...' );
 
 		// TODO: could this trigger OOM?
-		$to_keep = $wpdb->get_col( 'SELECT ID FROM ' . Init::TABLE_NAME );
+		$to_keep   = $wpdb->get_col( 'SELECT ID FROM ' . Init::TABLE_NAME );
+		$total_ids = $wpdb->get_var( 'SELECT COUNT(ID) FROM ' . $wpdb->posts );
 
 		$page     = 0;
 		$per_page = 250;
+
+		WP_CLI::line(
+			sprintf(
+				'   Expecting %1$s batches',
+				number_format(
+					ceil( $total_ids / $per_page )
+				)
+			)
+		);
 
 		// TODO: this isn't enough, it still tries to purge.
 		remove_action(
