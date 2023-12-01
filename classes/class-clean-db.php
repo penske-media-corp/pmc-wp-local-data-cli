@@ -86,6 +86,9 @@ final class Clean_DB {
 				wp_delete_post( $id_to_delete, true );
 			}
 
+			vip_reset_db_query_log();
+			vip_reset_local_object_cache();
+
 			$page++;
 		}
 
