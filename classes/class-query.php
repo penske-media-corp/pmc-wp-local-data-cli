@@ -84,6 +84,8 @@ final class Query {
 				// phpcs:ignore WordPress.WP.PostsPerPage.posts_per_page_posts_per_page
 				'posts_per_page'         => 500,
 				'post_status'            => 'any',
+				'orderby'                => 'ID',
+				'order'                  => 'ASC',
 				'suppress_filters'       => false,
 				'update_post_meta_cache' => false,
 				'update_post_term_cache' => false,
