@@ -48,8 +48,6 @@ final class Query {
 				str_replace(
 					__NAMESPACE__ . '\\',
 					'',
-					// WordPress standards won't support PHP 8.0 syntax until version 3.0.0.
-					// phpcs:ignore Generic.PHP.Syntax.PHPSyntax
 					$instance::class
 				)
 			)

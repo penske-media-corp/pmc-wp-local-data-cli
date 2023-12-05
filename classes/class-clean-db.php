@@ -56,7 +56,7 @@ final class Clean_DB {
 		WP_CLI::line(
 			sprintf(
 				'   Expecting %1$s batches',
-				number_format( $total_batches )
+				number_format_i18n( $total_batches )
 			)
 		);
 
@@ -69,7 +69,7 @@ final class Clean_DB {
 			WP_CLI::line(
 				sprintf(
 					'   > Processing batch %1$s (%2$d%%)',
-					number_format( $page + 1 ),
+					number_format_i18n( $page + 1 ),
 					round(
 						( $page + 1 ) / $total_batches * 100
 					)
