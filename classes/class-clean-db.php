@@ -31,7 +31,6 @@ final class Clean_DB {
 		$this->_clean_comments_table();
 		$this->_change_admin_email();
 	}
-
 	/**
 	 * Loop through all posts and delete those that shouldn't be retained.
 	 *
@@ -42,13 +41,10 @@ final class Clean_DB {
 
 		WP_CLI::line( ' * Starting post deletion. This will take a while...' );
 
-		// TODO: could this trigger OOM?
-		$to_keep   = $wpdb->get_col( 'SELECT ID FROM ' . Init::TABLE_NAME );
-		$total_ids = $wpdb->get_var( 'SELECT COUNT(ID) FROM ' . $wpdb->posts );
-
 		$page     = 0;
-		$per_page = 250;
+		$per_page = 500;
 
+		$total_ids = $wpdb->get_var( 'SELECT COUNT(ID) FROM ' . $wpdb->posts );
 		$total_batches = ceil( $total_ids / $per_page );
 
 		WP_CLI::line(
@@ -64,6 +60,9 @@ final class Clean_DB {
 			[ WPCOM_VIP_Cache_Manager::instance(), 'queue_post_purge' ]
 		);
 
+		wp_defer_term_counting( true );
+		wp_defer_comment_counting( true );
+
 		while (
 			$ids = $wpdb->get_col( $this->_get_delete_query( $page, $per_page ) )
 		) {
@@ -77,12 +76,7 @@ final class Clean_DB {
 				)
 			);
 
-			$to_delete = array_diff( $ids, $to_keep );
-
-			wp_defer_term_counting( true );
-			wp_defer_comment_counting( true );
-
-			foreach ( $to_delete as $id_to_delete ) {
+			foreach ( $ids as $id_to_delete ) {
 				wp_delete_post( $id_to_delete, true );
 			}
 
@@ -108,9 +102,13 @@ final class Clean_DB {
 	private function _get_delete_query( int $page, int $per_page ): string {
 		global $wpdb;
 
-		$offset = $page * $per_page;
-
-		return "SELECT ID FROM {$wpdb->posts} ORDER BY ID LIMIT {$offset},{$per_page}";
+		return $wpdb->prepare(
+			'SELECT ID FROM %1$s WHERE ID NOT IN ( SELECT ID FROM %2$s ) ORDER BY ID LIMIT %3$d,%4$d',
+			$wpdb->posts,
+			Init::TABLE_NAME,
+			$page * $per_page,
+			$per_page
+		);
 	}
 
 	/**
