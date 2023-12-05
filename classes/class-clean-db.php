@@ -57,8 +57,6 @@ final class Clean_DB {
 			)
 		);
 
-		$total_batches = ceil( $total_ids / $per_page );
-
 		WP_CLI::line(
 			sprintf(
 				'   Expecting %1$s batches',
@@ -70,7 +68,7 @@ final class Clean_DB {
 		wp_defer_comment_counting( true );
 
 		while (
-			$ids = $wpdb->get_col( $this->_get_delete_query( $page, $per_page ) )
+			$ids = $wpdb->get_col( $this->_get_delete_query( $per_page ) )
 		) {
 			WP_CLI::line(
 				sprintf(
@@ -102,20 +100,19 @@ final class Clean_DB {
 	/**
 	 * Build query to create list of IDs to check against list to retain.
 	 *
-	 * @param int $page     Current page.
 	 * @param int $per_page IDs per page.
 	 * @return string
 	 */
-	private function _get_delete_query( int $page, int $per_page ): string {
+	private function _get_delete_query( int $per_page ): string {
 		global $wpdb;
 
 		return $wpdb->prepare(
 			// Intentionally using complex placeholders to prevent incorrect quoting of table names.
 			// phpcs:ignore WordPress.DB.PreparedSQLPlaceholders.UnquotedComplexPlaceholder
-			'SELECT ID FROM `%1$s` WHERE ID NOT IN ( SELECT ID FROM `%2$s` ) ORDER BY ID LIMIT %3$d,%4$d',
+			'SELECT ID FROM `%1$s` WHERE ID NOT IN ( SELECT ID FROM `%2$s` ) ORDER BY ID ASC LIMIT %3$d,%4$d',
 			$wpdb->posts,
 			Init::TABLE_NAME,
-			$page * $per_page,
+			0,
 			$per_page
 		);
 	}
