@@ -31,6 +31,7 @@ final class Clean_DB {
 		$this->_clean_comments_table();
 		$this->_change_admin_email();
 	}
+
 	/**
 	 * Loop through all posts and delete those that shouldn't be retained.
 	 *
