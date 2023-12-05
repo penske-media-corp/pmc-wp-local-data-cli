@@ -44,7 +44,9 @@ final class Clean_DB {
 		$page     = 0;
 		$per_page = 500;
 
-		$total_ids = $wpdb->get_var( 'SELECT COUNT(ID) FROM ' . $wpdb->posts );
+		$total_ids     = $wpdb->get_var(
+			'SELECT COUNT(ID) FROM ' . $wpdb->posts
+		);
 		$total_batches = ceil( $total_ids / $per_page );
 
 		WP_CLI::line(
@@ -107,7 +109,9 @@ final class Clean_DB {
 		global $wpdb;
 
 		return $wpdb->prepare(
-			'SELECT ID FROM %1$s WHERE ID NOT IN ( SELECT ID FROM %2$s ) ORDER BY ID LIMIT %3$d,%4$d',
+			// Intentionally using complex placeholders to prevent incorrect quoting of table names.
+			// phpcs:ignore WordPress.DB.PreparedSQLPlaceholders.UnquotedComplexPlaceholder
+			'SELECT ID FROM `%1$s` WHERE ID NOT IN ( SELECT ID FROM `%2$s` ) ORDER BY ID LIMIT %3$d,%4$d',
 			$wpdb->posts,
 			Init::TABLE_NAME,
 			$page * $per_page,
