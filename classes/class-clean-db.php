@@ -54,6 +54,15 @@ final class Clean_DB {
 			)
 		);
 
+		$total_batches = ceil( $total_ids / $per_page );
+
+		WP_CLI::line(
+			sprintf(
+				'   Expecting %1$s batches',
+				number_format( $total_batches )
+			)
+		);
+
 		// TODO: this isn't enough, it still tries to purge.
 		remove_action(
 			'clean_post_cache',
