@@ -63,12 +63,6 @@ final class Clean_DB {
 			)
 		);
 
-		// TODO: this isn't enough, it still tries to purge.
-		remove_action(
-			'clean_post_cache',
-			[ WPCOM_VIP_Cache_Manager::instance(), 'queue_post_purge' ]
-		);
-
 		wp_defer_term_counting( true );
 		wp_defer_comment_counting( true );
 
@@ -91,6 +85,7 @@ final class Clean_DB {
 
 			vip_reset_db_query_log();
 			vip_reset_local_object_cache();
+			WPCOM_VIP_Cache_Manager::instance()->clear_queued_purge_urls();
 
 			$page++;
 		}
