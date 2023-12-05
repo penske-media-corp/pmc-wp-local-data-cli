@@ -48,14 +48,10 @@ final class Clean_DB {
 		$total_ids     = $wpdb->get_var(
 			'SELECT COUNT(ID) FROM ' . $wpdb->posts
 		);
-		$total_batches = ceil( $total_ids / $per_page );
-
-		WP_CLI::line(
-			sprintf(
-				'   Expecting %1$s batches',
-				number_format( $total_batches )
-			)
+		$total_to_keep = $wpdb->get_var(
+			'SELECT COUNT(ID) FROM ' . Init::TABLE_NAME
 		);
+		$total_batches = ceil( ( $total_ids - $total_to_keep ) / $per_page );
 
 		WP_CLI::line(
 			sprintf(
