@@ -60,7 +60,7 @@ final class PMC_Profiles extends Query_Args {
 			}
 
 			$ids[] = [
-				'ID'        => $linked_gallery_meta['id'],
+				'ID'        => (int) $linked_gallery_meta['id'],
 				'post_type' => PMC_Gallery::NAME,
 			];
 		}

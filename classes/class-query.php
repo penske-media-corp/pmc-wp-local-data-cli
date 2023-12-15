@@ -48,8 +48,6 @@ final class Query {
 				str_replace(
 					__NAMESPACE__ . '\\',
 					'',
-					// WordPress standards won't support PHP 8.0 syntax until version 3.0.0.
-					// phpcs:ignore Generic.PHP.Syntax.PHPSyntax
 					$instance::class
 				)
 			)
@@ -86,6 +84,8 @@ final class Query {
 				// phpcs:ignore WordPress.WP.PostsPerPage.posts_per_page_posts_per_page
 				'posts_per_page'         => 500,
 				'post_status'            => 'any',
+				'orderby'                => 'ID',
+				'order'                  => 'ASC',
 				'suppress_filters'       => false,
 				'update_post_meta_cache' => false,
 				'update_post_term_cache' => false,

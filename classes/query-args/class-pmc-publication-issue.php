@@ -9,6 +9,7 @@ declare( strict_types = 1 );
 
 namespace PMC\WP_Local_Data_CLI\Query_Args;
 
+use O2O_Query;
 use PMC\Publication_Issue_V2\Publication_Issue;
 use PMC\WP_Local_Data_CLI\Query_Args;
 
@@ -32,7 +33,7 @@ final class PMC_Publication_Issue extends Query_Args {
 		];
 
 		// Short-circuit this class if plugin isn't loaded.
-		if ( ! class_exists( 'O2O_Query', false ) ) {
+		if ( ! class_exists( O2O_Query::class, false ) ) {
 			self::$skip_backfill = true;
 
 			// Used in CLI context.
@@ -68,7 +69,7 @@ final class PMC_Publication_Issue extends Query_Args {
 
 		self::_add_thumbnail_id( $ids, $id );
 
-		$pdf = get_post_meta(
+		$pdf = (int) get_post_meta(
 			$id,
 			'pmc-pub-issue_pdf_attachment_attachment_id',
 			true
@@ -80,7 +81,7 @@ final class PMC_Publication_Issue extends Query_Args {
 			];
 		}
 
-		$lead_article = get_post_meta( $id, 'lead_article_id', true );
+		$lead_article = (int) get_post_meta( $id, 'lead_article_id', true );
 		if ( ! empty( $lead_article ) ) {
 			$ids[] = [
 				'ID'        => $lead_article,

@@ -42,52 +42,47 @@ final class Clean_DB {
 
 		WP_CLI::line( ' * Starting post deletion. This will take a while...' );
 
-		// TODO: could this trigger OOM?
-		$to_keep   = $wpdb->get_col( 'SELECT ID FROM ' . Init::TABLE_NAME );
-		$total_ids = $wpdb->get_var( 'SELECT COUNT(ID) FROM ' . $wpdb->posts );
-
 		$page     = 0;
-		$per_page = 250;
+		$per_page = 500;
 
-		$total_batches = ceil( $total_ids / $per_page );
+		$total_ids     = $wpdb->get_var(
+			'SELECT COUNT(ID) FROM ' . $wpdb->posts
+		);
+		$total_to_keep = $wpdb->get_var(
+			'SELECT COUNT(ID) FROM ' . Init::TABLE_NAME
+		);
+		$total_batches = ceil( ( $total_ids - $total_to_keep ) / $per_page );
 
 		WP_CLI::line(
 			sprintf(
 				'   Expecting %1$s batches',
-				number_format( $total_batches )
+				number_format_i18n( $total_batches )
 			)
 		);
 
-		// TODO: this isn't enough, it still tries to purge.
-		remove_action(
-			'clean_post_cache',
-			[ WPCOM_VIP_Cache_Manager::instance(), 'queue_post_purge' ]
-		);
+		wp_defer_term_counting( true );
+		wp_defer_comment_counting( true );
 
 		while (
-			$ids = $wpdb->get_col( $this->_get_delete_query( $page, $per_page ) )
+			$ids = $wpdb->get_col( $this->_get_delete_query( $per_page ) )
 		) {
 			WP_CLI::line(
 				sprintf(
 					'   > Processing batch %1$s (%2$d%%)',
-					number_format( $page + 1 ),
+					number_format_i18n( $page + 1 ),
 					round(
 						( $page + 1 ) / $total_batches * 100
 					)
 				)
 			);
 
-			$to_delete = array_diff( $ids, $to_keep );
-
-			wp_defer_term_counting( true );
-			wp_defer_comment_counting( true );
-
-			foreach ( $to_delete as $id_to_delete ) {
+			foreach ( $ids as $id_to_delete ) {
 				wp_delete_post( $id_to_delete, true );
 			}
 
 			vip_reset_db_query_log();
 			vip_reset_local_object_cache();
+			WPCOM_VIP_Cache_Manager::instance()->clear_queued_purge_urls();
 
 			$page++;
 		}
@@ -101,16 +96,21 @@ final class Clean_DB {
 	/**
 	 * Build query to create list of IDs to check against list to retain.
 	 *
-	 * @param int $page     Current page.
 	 * @param int $per_page IDs per page.
 	 * @return string
 	 */
-	private function _get_delete_query( int $page, int $per_page ): string {
+	private function _get_delete_query( int $per_page ): string {
 		global $wpdb;
 
-		$offset = $page * $per_page;
-
-		return "SELECT ID FROM {$wpdb->posts} ORDER BY ID LIMIT {$offset},{$per_page}";
+		return $wpdb->prepare(
+			// Intentionally using complex placeholders to prevent incorrect quoting of table names.
+			// phpcs:ignore WordPress.DB.PreparedSQLPlaceholders.UnquotedComplexPlaceholder
+			'SELECT ID FROM `%1$s` WHERE ID NOT IN ( SELECT ID FROM `%2$s` ) ORDER BY ID ASC LIMIT %3$d,%4$d',
+			$wpdb->posts,
+			Init::TABLE_NAME,
+			0,
+			$per_page
+		);
 	}
 
 	/**

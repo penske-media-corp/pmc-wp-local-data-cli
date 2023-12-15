@@ -59,7 +59,7 @@ final class PMC_Gallery extends Query_Args {
 		if ( is_array( $gallery_images ) ) {
 			foreach ( $gallery_images as $attachment_id ) {
 				$ids[] = [
-					'ID'        => $attachment_id,
+					'ID'        => (int) $attachment_id,
 					'post_type' => Attachment_Detail::NAME,
 				];
 			}
