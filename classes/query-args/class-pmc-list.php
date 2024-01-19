@@ -50,6 +50,7 @@ final class PMC_List extends Query_Args {
 		$ids = [];
 
 		$list_items = Lists::get_instance()->get_sorted_list_item_ids( $id );
+
 		// Variable is known to be an array.
 		// phpcs:ignore PmcWpVip.Functions.StrictArrayParameters.NoTypeCastParam
 		$list_items = array_map( 'intval', $list_items );
