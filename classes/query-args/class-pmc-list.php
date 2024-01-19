@@ -50,6 +50,8 @@ final class PMC_List extends Query_Args {
 		$ids = [];
 
 		$list_items = Lists::get_instance()->get_sorted_list_item_ids( $id );
+		$list_items = array_map( 'intval', $list_items );
+
 		foreach ( $list_items as $item ) {
 			$ids[] = [
 				'ID'        => $item,
