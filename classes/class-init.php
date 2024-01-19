@@ -167,7 +167,7 @@ final class Init extends PMC_WP_CLI {
 			new Query_Args\PMC_Not_For_Publication(),
 			new Query_Args\PMC_Profiles(),
 			new Query_Args\PMC_Profiles_Landing_Page(),
-			new Query_Args\PMC_Publication_Issue(),
+			// new Query_Args\PMC_Publication_Issue(),
 			new Query_Args\PMC_Reviews(),
 			new Query_Args\PMC_Store_Products(),
 			new Query_Args\PMC_TOC(),
