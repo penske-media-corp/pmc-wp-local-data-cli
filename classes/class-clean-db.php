@@ -148,5 +148,6 @@ final class Clean_DB {
 		WP_CLI::line( ' * Overwriting `admin_email` option.' );
 
 		update_option( 'admin_email', 'admin@pmcdev.local' );
+		delete_option( 'new_admin_email' );
 	}
 }
