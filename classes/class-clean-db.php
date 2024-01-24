@@ -30,6 +30,7 @@ final class Clean_DB {
 		$this->_clean_users_table();
 		$this->_clean_comments_table();
 		$this->_change_admin_email();
+		$this->_disconnect_jetpack();
 	}
 
 	/**
@@ -149,5 +150,24 @@ final class Clean_DB {
 
 		update_option( 'admin_email', 'admin@pmcdev.local' );
 		delete_option( 'new_admin_email' );
+	}
+
+	/**
+	 * Remove Jetpack connection data.
+	 *
+	 * @return void
+	 */
+	private function _disconnect_jetpack(): void {
+		WP_CLI::line( ' * Disconnecting Jetpack.' );
+
+		foreach (
+			[
+				'jetpack_active_plan',
+				'jetpack_options',
+				'jetpack_private_options',
+			] as $option
+		) {
+			delete_option( $option );
+		}
 	}
 }
