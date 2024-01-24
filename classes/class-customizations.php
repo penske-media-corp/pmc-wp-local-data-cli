@@ -53,6 +53,11 @@ final class Customizations {
 		);
 
 		add_action(
+			'pmc_wp_cli_local_data_before_processing',
+			[ $this, 'disconnect_jetpack' ]
+		);
+
+		add_action(
 			'pmc_wp_cli_local_data_after_processing',
 			[ $this, 'add_dev_user' ]
 		);
@@ -65,6 +70,11 @@ final class Customizations {
 		add_action(
 			'pmc_wp_cli_local_data_after_processing',
 			[ $this, 'flush_rewrites' ]
+		);
+
+		add_action(
+			'pmc_wp_cli_local_data_after_processing',
+			[ $this, 'remove_google_analytics_ids' ]
 		);
 	}
 
@@ -83,14 +93,40 @@ final class Customizations {
 	}
 
 	/**
+	 * Remove Jetpack connection data.
+	 *
+	 * @return void
+	 */
+	public function disconnect_jetpack(): void {
+		WP_CLI::line( ' * Disconnecting Jetpack.' );
+
+		foreach (
+			[
+				'jetpack_active_plan',
+				'jetpack_options',
+				'jetpack_private_options',
+			] as $option
+		) {
+			delete_option( $option );
+		}
+	}
+
+	/**
 	 * Add our default local user.
 	 *
 	 * @return void
 	 */
 	public function add_dev_user(): void {
-		wp_create_user( 'pmcdev', 'pmcdev', 'pmcdev@pmc.local' );
+		WP_CLI::line( ' * Adding `pmcdev` user.' );
 
-		WP_CLI::line( ' * Added `pmcdev` user.' );
+		wp_insert_user(
+			[
+				'user_login' => 'pmcdev',
+				'user_pass'  => 'pmcdev',
+				'user_email' => 'pmcdev@pmc.local',
+				'role'       => 'administrator',
+			]
+		);
 	}
 
 	/**
@@ -117,5 +153,26 @@ final class Customizations {
 		// phpcs:ignore WordPressVIPMinimum.Functions.RestrictedFunctions.flush_rewrite_rules_flush_rewrite_rules
 		flush_rewrite_rules( false );
 		do_action( 'rri_flush_rules' );
+	}
+
+	/**
+	 * Clear options holding Google Analytics IDs.
+	 *
+	 * @return void
+	 */
+	public function remove_google_analytics_ids(): void {
+		WP_CLI::line( ' * Removing Google Analytics IDs.' );
+
+		foreach (
+			[
+				'pmc_ga4_admin_tracking_id',
+				'pmc_ga4_newsbreak_tracking_id',
+				'pmc_google_analytics_account',
+				'pmc_google_analytics_account_ga4',
+				'pmc_google_tag_manager_account',
+			] as $option
+		) {
+			delete_option( $option );
+		}
 	}
 }
