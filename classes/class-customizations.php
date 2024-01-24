@@ -66,6 +66,11 @@ final class Customizations {
 			'pmc_wp_cli_local_data_after_processing',
 			[ $this, 'flush_rewrites' ]
 		);
+
+		add_action(
+			'pmc_wp_cli_local_data_after_processing',
+			[ $this, 'remove_google_analytics_ids' ]
+		);
 	}
 
 	/**
@@ -124,5 +129,24 @@ final class Customizations {
 		// phpcs:ignore WordPressVIPMinimum.Functions.RestrictedFunctions.flush_rewrite_rules_flush_rewrite_rules
 		flush_rewrite_rules( false );
 		do_action( 'rri_flush_rules' );
+	}
+
+	/**
+	 * Clear options holding Google Analytics IDs.
+	 *
+	 * @return void
+	 */
+	public function remove_google_analytics_ids(): void {
+		foreach (
+			[
+				'pmc_ga4_admin_tracking_id',
+				'pmc_ga4_newsbreak_tracking_id',
+				'pmc_google_analytics_account',
+				'pmc_google_analytics_account_ga4',
+				'pmc_google_tag_manager_account',
+			] as $option
+		) {
+			delete_option( $option );
+		}
 	}
 }
