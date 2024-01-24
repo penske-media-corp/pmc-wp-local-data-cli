@@ -88,7 +88,14 @@ final class Customizations {
 	 * @return void
 	 */
 	public function add_dev_user(): void {
-		wp_create_user( 'pmcdev', 'pmcdev', 'pmcdev@pmc.local' );
+		wp_insert_user(
+			[
+				'user_login' => 'pmcdev',
+				'user_pass'  => 'pmcdev',
+				'user_email' => 'pmcdev@pmc.local',
+				'role'       => 'administrator',
+			]
+		);
 
 		WP_CLI::line( ' * Added `pmcdev` user.' );
 	}
