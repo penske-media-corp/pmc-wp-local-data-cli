@@ -53,6 +53,11 @@ final class Customizations {
 		);
 
 		add_action(
+			'pmc_wp_cli_local_data_before_processing',
+			[ $this, 'disconnect_jetpack' ]
+		);
+
+		add_action(
 			'pmc_wp_cli_local_data_after_processing',
 			[ $this, 'add_dev_user' ]
 		);
@@ -85,6 +90,25 @@ final class Customizations {
 		);
 
 		VIP_Go_Sync_Cleanup::get_instance()->do_cleanup();
+	}
+
+	/**
+	 * Remove Jetpack connection data.
+	 *
+	 * @return void
+	 */
+	public function disconnect_jetpack(): void {
+		WP_CLI::line( ' * Disconnecting Jetpack.' );
+
+		foreach (
+			[
+				'jetpack_active_plan',
+				'jetpack_options',
+				'jetpack_private_options',
+			] as $option
+		) {
+			delete_option( $option );
+		}
 	}
 
 	/**
@@ -137,6 +161,8 @@ final class Customizations {
 	 * @return void
 	 */
 	public function remove_google_analytics_ids(): void {
+		WP_CLI::line( ' * Removing Google Analytics IDs.' );
+
 		foreach (
 			[
 				'pmc_ga4_admin_tracking_id',
