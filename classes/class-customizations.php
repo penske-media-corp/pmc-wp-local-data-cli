@@ -117,6 +117,8 @@ final class Customizations {
 	 * @return void
 	 */
 	public function add_dev_user(): void {
+		WP_CLI::line( ' * Adding `pmcdev` user.' );
+
 		wp_insert_user(
 			[
 				'user_login' => 'pmcdev',
@@ -125,8 +127,6 @@ final class Customizations {
 				'role'       => 'administrator',
 			]
 		);
-
-		WP_CLI::line( ' * Added `pmcdev` user.' );
 	}
 
 	/**
