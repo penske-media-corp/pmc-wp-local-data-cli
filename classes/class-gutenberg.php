@@ -9,6 +9,8 @@ declare( strict_types = 1 );
 
 namespace PMC\WP_Local_Data_CLI;
 
+use WP_Post;
+
 /**
  * Class Gutenberg.
  */
@@ -152,6 +154,10 @@ final class Gutenberg {
 			array_unique(
 				array_merge( ...$this->_ids )
 			)
+		);
+		$ids = array_filter(
+			$ids,
+			static fn ( int $id ): bool => get_post( $id ) instanceof WP_Post
 		);
 
 		foreach ( $ids as $id ) {
