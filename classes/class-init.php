@@ -123,32 +123,36 @@ final class Init extends PMC_WP_CLI {
 		 * Rather than stop the cleanup process, the try-catch allows us to
 		 * surface the error and carry on.
 		 */
-		try {
-			foreach ( $query_args_instances as $query_args_instance ) {
+		foreach ( $query_args_instances as $query_args_instance ) {
+			try {
 				new Query( $query_args_instance );
+			} catch ( Throwable $throwable ) {
+				WP_CLI::warning( $throwable->getMessage() );
 			}
-
-			/**
-			 * Backfill is processed after all initial IDs are gathered in case
-			 * linked IDs themselves have dependencies.
-			 *
-			 * This process may run multiple times because a run of backfill
-			 * could add additional IDs that themselves have dependencies.
-			 */
-			do {
-				$found_ids = $this->_count_ids_to_keep();
-
-				foreach ( $query_args_instances as $query_args_instance ) {
-					if ( $query_args_instance::$skip_backfill ) {
-						continue;
-					}
-
-					new Query( $query_args_instance, true );
-				}
-			} while ( $found_ids !== $this->_count_ids_to_keep() );
-		} catch ( Throwable $throwable ) {
-			WP_CLI::warning( $throwable->getMessage() );
 		}
+
+		/**
+		 * Backfill is processed after all initial IDs are gathered in case
+		 * linked IDs themselves have dependencies.
+		 *
+		 * This process may run multiple times because a run of backfill
+		 * could add additional IDs that themselves have dependencies.
+		 */
+		do {
+			$found_ids = $this->_count_ids_to_keep();
+
+			foreach ( $query_args_instances as $query_args_instance ) {
+				if ( $query_args_instance::$skip_backfill ) {
+					continue;
+				}
+
+				try {
+					new Query( $query_args_instance, true );
+				} catch ( Throwable $throwable ) {
+					WP_CLI::warning( $throwable->getMessage() );
+				}
+			}
+		} while ( $found_ids !== $this->_count_ids_to_keep() );
 
 		if ( $found_ids < 1 ) {
 			WP_CLI::error(
