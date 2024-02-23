@@ -111,8 +111,24 @@ final class Init extends PMC_WP_CLI {
 	private function _query_for_ids_to_keep(): void {
 		$query_args_instances = $this->_get_query_args_instances();
 
+		/**
+		 * Each `Query_args` instance is processed within a try-catch block
+		 * because some of our plugins don't support the autoloader in
+		 * `pmc-global-functions`, and if a theme doesn't activate one of the
+		 * plugins that a `Query_Args` class depends on, a fatal error may be
+		 * thrown.
+		 *
+		 * We can safely assume that if the active theme doesn't load an
+		 * affected plugin, its data is not required for local development.
+		 * Rather than stop the cleanup process, the try-catch allows us to
+		 * surface the error and carry on.
+		 */
 		foreach ( $query_args_instances as $query_args_instance ) {
-			new Query( $query_args_instance );
+			try {
+				new Query( $query_args_instance );
+			} catch ( Throwable $throwable ) {
+				WP_CLI::warning( $throwable->getMessage() );
+			}
 		}
 
 		/**
@@ -130,9 +146,17 @@ final class Init extends PMC_WP_CLI {
 					continue;
 				}
 
-				new Query( $query_args_instance, true );
+				try {
+					new Query( $query_args_instance, true );
+				} catch ( Throwable $throwable ) {
+					WP_CLI::warning( $throwable->getMessage() );
+				}
 			}
 		} while ( $found_ids !== $this->_count_ids_to_keep() );
+
+		if ( $found_ids < 1 ) {
+			WP_CLI::error( 'No IDs were found. Please check the logs.' );
+		}
 
 		WP_CLI::line(
 			sprintf(
@@ -149,58 +173,36 @@ final class Init extends PMC_WP_CLI {
 	 * @return array
 	 */
 	private function _get_query_args_instances(): array {
-		$classes = [
-			Query_Args\CoAuthors_Plus::class,
-			Query_Args\Nav_Menu_Item::class,
-			Query_Args\OEmbed_Cache::class,
-			Query_Args\Page::class,
-			Query_Args\PMC_Ads::class,
-			Query_Args\PMC_Amzn_Onsite::class,
-			Query_Args\PMC_Attachments::class,
-			Query_Args\PMC_Buy_Now_Block::class,
-			Query_Args\PMC_Buy_Now_Shortcode::class,
-			Query_Args\PMC_Carousel::class,
-			Query_Args\PMC_Ecomm::class,
-			Query_Args\PMC_FAQ::class,
-			Query_Args\PMC_Gallery::class,
-			Query_Args\PMC_Hub::class,
-			Query_Args\PMC_List::class,
-			Query_Args\PMC_Not_For_Publication::class,
-			Query_Args\PMC_Profiles::class,
-			Query_Args\PMC_Profiles_Landing_Page::class,
-			// Query_Args\PMC_Publication_Issue::class,
-			Query_Args\PMC_Reviews::class,
-			Query_Args\PMC_Store_Products::class,
-			Query_Args\PMC_TOC::class,
-			Query_Args\PMC_Top_Video::class,
-			Query_Args\PMC_Touts::class,
-			Query_Args\Post::class,
-			Query_Args\Safe_Redirect_Manager::class,
-			Query_Args\WPCOM_Legacy_Redirector::class,
-			Query_Args\Zoninator::class,
+		$query_args = [
+			new Query_Args\CoAuthors_Plus(),
+			new Query_Args\Nav_Menu_Item(),
+			new Query_Args\OEmbed_Cache(),
+			new Query_Args\Page(),
+			new Query_Args\PMC_Ads(),
+			new Query_Args\PMC_Amzn_Onsite(),
+			new Query_Args\PMC_Attachments(),
+			new Query_Args\PMC_Buy_Now_Block(),
+			new Query_Args\PMC_Buy_Now_Shortcode(),
+			new Query_Args\PMC_Carousel(),
+			new Query_Args\PMC_Ecomm(),
+			new Query_Args\PMC_FAQ(),
+			new Query_Args\PMC_Gallery(),
+			new Query_Args\PMC_Hub(),
+			new Query_Args\PMC_List(),
+			new Query_Args\PMC_Not_For_Publication(),
+			new Query_Args\PMC_Profiles(),
+			new Query_Args\PMC_Profiles_Landing_Page(),
+			// new Query_Args\PMC_Publication_Issue(),
+			new Query_Args\PMC_Reviews(),
+			new Query_Args\PMC_Store_Products(),
+			new Query_Args\PMC_TOC(),
+			new Query_Args\PMC_Top_Video(),
+			new Query_Args\PMC_Touts(),
+			new Query_Args\Post(),
+			new Query_Args\Safe_Redirect_Manager(),
+			new Query_Args\WPCOM_Legacy_Redirector(),
+			new Query_Args\Zoninator(),
 		];
-
-		$query_args = [];
-
-		/**
-		 * Each built-in class is instantiated in a try-catch block because some
-		 * of our plugins don't support the autoloader in
-		 * `pmc-global-functions`, and if a theme doesn't activate one of the
-		 * plugins that a `Query_Args` class depends on, a fatal error may be
-		 * thrown.
-		 *
-		 * We can safely assume that if the active theme doesn't load an
-		 * affected plugin, its data is not required for local development.
-		 * Rather than stop the cleanup process, the try-catch allows us to
-		 * surface the error and carry on.
-		 */
-		foreach ( $classes as $class ) {
-			try {
-				$query_args[] = new $class();
-			} catch ( Throwable $throwable ) {
-				WP_CLI::warning( $throwable->getMessage() );
-			}
-		}
 
 		/**
 		 * Allow themes to add support for custom features that are not part of
