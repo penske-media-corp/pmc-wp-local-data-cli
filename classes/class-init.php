@@ -184,6 +184,7 @@ final class Init extends PMC_WP_CLI {
 			new Query_Args\PMC_Buy_Now_Block(),
 			new Query_Args\PMC_Buy_Now_Shortcode(),
 			new Query_Args\PMC_Carousel(),
+			new Query_Args\PMC_Custom_Feed(),
 			new Query_Args\PMC_Ecomm(),
 			new Query_Args\PMC_FAQ(),
 			new Query_Args\PMC_Gallery(),
