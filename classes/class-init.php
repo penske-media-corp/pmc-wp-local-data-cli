@@ -155,9 +155,7 @@ final class Init extends PMC_WP_CLI {
 		} while ( $found_ids !== $this->_count_ids_to_keep() );
 
 		if ( $found_ids < 1 ) {
-			WP_CLI::error(
-				'No IDs were found. Please check the logs.'
-			);
+			WP_CLI::error( 'No IDs were found. Please check the logs.' );
 		}
 
 		WP_CLI::line(
