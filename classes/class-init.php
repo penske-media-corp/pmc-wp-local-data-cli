@@ -109,14 +109,14 @@ final class Init extends PMC_WP_CLI {
 	 * @return void
 	 */
 	private function _query_for_ids_to_keep(): void {
-		$found_ids            = -1;
 		$query_args_instances = $this->_get_query_args_instances();
 
 		/**
-		 * Each class is processed within a try-catch block because some of our
-		 * plugins don't support the autoloader in `pmc-global-functions`, and
-		 * if a theme doesn't activate one of the plugins that a `Query_Args`
-		 * class depends on, a fatal error may be thrown.
+		 * Each `Query_args` instance is processed within a try-catch block
+		 * because some of our plugins don't support the autoloader in
+		 * `pmc-global-functions`, and if a theme doesn't activate one of the
+		 * plugins that a `Query_Args` class depends on, a fatal error may be
+		 * thrown.
 		 *
 		 * We can safely assume that if the active theme doesn't load an
 		 * affected plugin, its data is not required for local development.
@@ -135,8 +135,8 @@ final class Init extends PMC_WP_CLI {
 		 * Backfill is processed after all initial IDs are gathered in case
 		 * linked IDs themselves have dependencies.
 		 *
-		 * This process may run multiple times because a run of backfill
-		 * could add additional IDs that themselves have dependencies.
+		 * This process may run multiple times because a run of backfill could
+		 * add additional IDs that themselves have dependencies.
 		 */
 		do {
 			$found_ids = $this->_count_ids_to_keep();
