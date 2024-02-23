@@ -130,6 +130,7 @@ final class Customizations {
 		foreach (
 			[
 				'wp_a8c_cron_control_jobs',
+				'wp_jetpack_sync_queue',
 				'wp_vip_search_index_queue',
 			] as $table
 		) {
