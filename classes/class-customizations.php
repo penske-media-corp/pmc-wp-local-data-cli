@@ -58,6 +58,11 @@ final class Customizations {
 		);
 
 		add_action(
+			'pmc_wp_cli_local_data_before_processing',
+			[ $this, 'remove_superfluous_vip_tables' ]
+		);
+
+		add_action(
 			'pmc_wp_cli_local_data_after_processing',
 			[ $this, 'add_dev_user' ]
 		);
@@ -108,6 +113,30 @@ final class Customizations {
 			] as $option
 		) {
 			delete_option( $option );
+		}
+	}
+
+	/**
+	 * Remove unnecessary tables created by VIP features that are not active
+	 * locally.
+	 *
+	 * @return void
+	 */
+	public function remove_superfluous_vip_tables(): void {
+		global $wpdb;
+
+		WP_CLI::line( ' * Removing certain tables created by VIP features.' );
+
+		foreach (
+			[
+				'wp_a8c_cron_control_jobs',
+				'wp_jetpack_sync_queue',
+				'wp_vip_search_index_queue',
+			] as $table
+		) {
+			// Direct queries are necessary as WPDB does not provide a method to drop tables. Table names cannot be interpolated.
+			// phpcs:ignore WordPress.DB.DirectDatabaseQuery, WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+			$wpdb->query( "DROP TABLE IF EXISTS {$table}" );
 		}
 	}
 
