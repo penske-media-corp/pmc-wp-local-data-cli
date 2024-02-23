@@ -134,6 +134,8 @@ final class Customizations {
 				'wp_vip_search_index_queue',
 			] as $table
 		) {
+			// Direct queries are necessary as WPDB does not provide a method to drop tables. Table names cannot be interpolated.
+			// phpcs:ignore WordPress.DB.DirectDatabaseQuery, WordPress.DB.PreparedSQL.InterpolatedNotPrepared
 			$wpdb->query( "DROP TABLE IF EXISTS {$table}" );
 		}
 	}
