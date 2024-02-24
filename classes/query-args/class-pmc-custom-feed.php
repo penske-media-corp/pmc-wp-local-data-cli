@@ -24,6 +24,15 @@ final class PMC_Custom_Feed extends Query_Args {
 	public static bool $find_linked_ids = false;
 
 	/**
+	 * Whether or not to skip the backfill process. Typically this is used when
+	 * a query's `post_type` is set to the special value "any" as backfill
+	 * cannot be applied to such a query.
+	 *
+	 * @var bool
+	 */
+	public static bool $skip_backfill = true;
+
+	/**
 	 * Build array of `WP_Query` arguments used to retrieve IDs to retain.
 	 *
 	 * @return array
