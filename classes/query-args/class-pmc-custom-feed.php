@@ -40,7 +40,7 @@ final class PMC_Custom_Feed extends Query_Args {
 	public static function get_query_args(): array {
 		return [
 			'post_type'      => Plugin::post_type_name,
-			'posts_per_page' => - 1,
+			'posts_per_page' => -1,
 		];
 	}
 }
