@@ -57,9 +57,11 @@ final class Customizations {
 			[ $this, 'disconnect_jetpack' ]
 		);
 
+		// Run late as requests from Cron Control can interfere.
 		add_action(
-			'pmc_wp_cli_local_data_before_processing',
-			[ $this, 'remove_superfluous_vip_tables' ]
+			'pmc_wp_cli_local_data_after_processing',
+			[ $this, 'remove_superfluous_vip_tables' ],
+			999
 		);
 
 		add_action(
