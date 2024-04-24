@@ -16,8 +16,8 @@ declare( strict_types = 1 );
 namespace PMC\WP_Local_Data_CLI;
 
 use WP_CLI;
-use WPCOM_VIP_Cache_Manager;
 use WP_Post;
+use WPCOM_VIP_Cache_Manager;
 
 /**
  * Class Clean_DB.
