@@ -17,6 +17,7 @@ namespace PMC\WP_Local_Data_CLI;
 
 use WP_CLI;
 use WPCOM_VIP_Cache_Manager;
+use WP_Post;
 
 /**
  * Class Clean_DB.
@@ -55,13 +56,15 @@ final class Clean_DB {
 
 		WP_CLI::line(
 			sprintf(
-				'   Expecting %1$s batches',
-				number_format_i18n( $total_batches )
+				'   Expecting %1$s batches (%2$s total IDs; %3$s to keep; deleting %4$s per batch)',
+				number_format_i18n( $total_batches ),
+				number_format_i18n( $total_ids ),
+				number_format_i18n( $total_to_keep ),
+				number_format_i18n( $per_page )
 			)
 		);
 
-		wp_defer_term_counting( true );
-		wp_defer_comment_counting( true );
+		$this->_defer_counts( true );
 
 		while (
 			$ids = $wpdb->get_col( $this->_get_delete_query( $per_page ) )
@@ -77,20 +80,38 @@ final class Clean_DB {
 			);
 
 			foreach ( $ids as $id_to_delete ) {
-				wp_delete_post( $id_to_delete, true );
+				$deleted = wp_delete_post( $id_to_delete, true );
+
+				if ( ! $deleted instanceof WP_Post ) {
+					WP_CLI::warning(
+						sprintf(
+							'     - Failed to delete post ID `%1$d`',
+							$id_to_delete
+						)
+					);
+				}
 			}
 
-			vip_reset_db_query_log();
-			vip_reset_local_object_cache();
-			WPCOM_VIP_Cache_Manager::instance()->clear_queued_purge_urls();
+			$this->_free_resources();
 
 			$page++;
 		}
 
-		wp_defer_term_counting( false );
-		wp_defer_comment_counting( false );
+		$this->_free_resources();
+		$this->_defer_counts( false );
 
 		WP_CLI::line( ' * Finished deleting posts.' );
+	}
+
+	/**
+	 * Prevent WP from performing certain counting operations.
+	 *
+	 * @param bool $defer To defer or not to defer, that is the question.
+	 * @return void
+	 */
+	private function _defer_counts( bool $defer ): void {
+		wp_defer_term_counting( $defer );
+		wp_defer_comment_counting( $defer );
 	}
 
 	/**
@@ -111,6 +132,17 @@ final class Clean_DB {
 			0,
 			$per_page
 		);
+	}
+
+	/**
+	 * Perform operations to free resources.
+	 *
+	 * @return void
+	 */
+	private function _free_resources(): void {
+		vip_reset_db_query_log();
+		vip_reset_local_object_cache();
+		WPCOM_VIP_Cache_Manager::instance()->clear_queued_purge_urls();
 	}
 
 	/**
