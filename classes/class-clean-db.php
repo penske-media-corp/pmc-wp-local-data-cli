@@ -47,13 +47,12 @@ final class Clean_DB {
 		$per_page = 500;
 
 		$total_ids     = $wpdb->get_var(
-			'SELECT COUNT(ID) FROM ' . $wpdb->posts
+			"SELECT COUNT(ID) FROM `{$wpdb->posts}` WHERE post_type != 'revision'"
 		);
 		$total_to_keep = $wpdb->get_var(
 			'SELECT COUNT(ID) FROM ' . Init::TABLE_NAME
 		);
 		$total_batches = ceil( ( $total_ids - $total_to_keep ) / $per_page );
-
 		WP_CLI::line(
 			sprintf(
 				'   Expecting %1$s batches (%2$s total IDs; %3$s to keep; deleting %4$s per batch)',
@@ -69,6 +68,19 @@ final class Clean_DB {
 		while (
 			$ids = $wpdb->get_col( $this->_get_delete_query( $per_page ) )
 		) {
+			if ( $page > ( $total_batches * 1.25 ) ) {
+				WP_CLI::warning(
+					sprintf(
+						'   > Infinite loop detected, terminating deletion with at least %1$s IDs left to delete!',
+						number_format_i18n(
+							count( $ids )
+						)
+					)
+				);
+
+				break;
+			}
+
 			WP_CLI::line(
 				sprintf(
 					'   > Processing batch %1$s (%2$d%%)',
@@ -126,7 +138,7 @@ final class Clean_DB {
 		return $wpdb->prepare(
 			// Intentionally using complex placeholders to prevent incorrect quoting of table names.
 			// phpcs:ignore WordPress.DB.PreparedSQLPlaceholders.UnquotedComplexPlaceholder
-			'SELECT ID FROM `%1$s` WHERE ID NOT IN ( SELECT ID FROM `%2$s` ) ORDER BY ID ASC LIMIT %3$d,%4$d',
+			'SELECT ID FROM `%1$s` WHERE ID NOT IN ( SELECT ID FROM `%2$s` ) AND post_type != \'revision\' ORDER BY ID ASC LIMIT %3$d,%4$d',
 			$wpdb->posts,
 			Init::TABLE_NAME,
 			0,
