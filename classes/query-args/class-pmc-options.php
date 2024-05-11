@@ -31,7 +31,8 @@ final class PMC_Options extends Query_Args {
 	 */
 	public static function get_query_args(): array {
 		return [
-			'post_type' => Plugin::POST_TYPE_NAME,
+			'post_type'      => Plugin::POST_TYPE_NAME,
+			'posts_per_page' => -1,
 		];
 	}
 }
