@@ -1,6 +1,6 @@
 <?php
 /**
- * Retain `pmc_events` objects and their associated data.
+ * Retain the last six months of `pmc_events` objects and their associated data.
  *
  * @package pmc-wp-local-data-cli
  */
@@ -24,7 +24,11 @@ final class PMC_Events extends Query_Args {
 	public static function get_query_args(): array {
 		return [
 			'post_type'      => Plugin::SLUG,
-			'posts_per_page' => -1,
+			'date_query' => [
+				[
+					'after' => '-6 months',
+				],
+			],
 		];
 	}
 
