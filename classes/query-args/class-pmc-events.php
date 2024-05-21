@@ -23,7 +23,7 @@ final class PMC_Events extends Query_Args {
 	 */
 	public static function get_query_args(): array {
 		return [
-			'post_type'      => Plugin::SLUG,
+			'post_type'  => Plugin::SLUG,
 			'date_query' => [
 				[
 					'after' => '-6 months',
