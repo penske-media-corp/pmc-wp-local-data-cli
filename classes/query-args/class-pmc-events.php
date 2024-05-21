@@ -1,6 +1,6 @@
 <?php
 /**
- * Retain recent `pmc_events` objects and their associated data.
+ * Retain `pmc_events` objects and their associated data.
  *
  * @package pmc-wp-local-data-cli
  */
