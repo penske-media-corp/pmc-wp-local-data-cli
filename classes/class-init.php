@@ -186,6 +186,7 @@ final class Init extends PMC_WP_CLI {
 			new Query_Args\PMC_Carousel(),
 			new Query_Args\PMC_Custom_Feed(),
 			new Query_Args\PMC_Ecomm(),
+			new Query_Args\PMC_Events(),
 			new Query_Args\PMC_FAQ(),
 			new Query_Args\PMC_Gallery(),
 			new Query_Args\PMC_Hub(),
