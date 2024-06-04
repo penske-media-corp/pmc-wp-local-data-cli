@@ -180,6 +180,7 @@ final class Customizations {
 	public function flush_rewrites(): void {
 		WP_CLI::line( ' * Flushing rewrite rules.' );
 
+		wp_cache_delete( 'rewrite_rules', 'options' );
 		// Used in CLI context.
 		// phpcs:ignore WordPressVIPMinimum.Functions.RestrictedFunctions.flush_rewrite_rules_flush_rewrite_rules
 		flush_rewrite_rules( false );
