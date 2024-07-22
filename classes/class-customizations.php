@@ -12,6 +12,7 @@ namespace PMC\WP_Local_Data_CLI;
 use PMC\Global_Functions\Traits\Singleton;
 use PMC\Global_Functions\VIP_Go_Sync_Cleanup;
 use WP_CLI;
+use WP_User;
 
 /**
  * Class Customizations.
@@ -150,7 +151,7 @@ final class Customizations {
 	public function add_dev_user(): void {
 		WP_CLI::line( ' * Adding `pmcdev` user.' );
 
-		wp_insert_user(
+		$id = wp_insert_user(
 			[
 				'user_login' => 'pmcdev',
 				'user_pass'  => 'pmcdev',
@@ -158,6 +159,9 @@ final class Customizations {
 				'role'       => 'administrator',
 			]
 		);
+
+		$user = new WP_User( $id );
+		$user->add_cap( 'view_query_monitor' );
 	}
 
 	/**
