@@ -10,6 +10,10 @@ backup to a size that is suitable for local development. It includes handlers
 for both built-in WordPress data structures as well as those found in Core Tech. 
 Individual themes can provide their own handlers for brand-specific code.
 
+As this plugin is built to support PMC's architecture, it depends on parts of 
+our that are not represented in this plugin. We share it publicly to serve as a
+guide.
+
 ## Overview
 
 The plugin is organized into two broad categories. The first portion deals with 
@@ -38,7 +42,7 @@ equivalents as faithfully as possible.
 To ensure that the trimmed database is as small as possible, the plugin uses
 `wp_delete_post()` to remove unneeded posts; doing so allows WordPress to remove
 revisions, postmeta, term associations, etc. without the plugin needing to 
-account for all of a post's associations across WordPress's many tables.
+account for all of a post's associations across WordPress's tables.
 
 In some cases, it may not be possible to remove a post due to protections in
 place in other parts of a site's codebase. For instance, if special pages are
@@ -52,8 +56,9 @@ if its iterations exceed 125% of what was expected.
 This plugin provides handlers for both post types that are native to WordPress,
 as well as those found in Core Tech. Any post type that is registered in a 
 brand's theme must have a handler added to the theme or its objects will be 
-removed by this plugin. The plugin provides a filter that allows a brand theme
-to register its instances of the `PMC\WP_Local_Data_CLI\Query_Args` class.
+removed by the trimming process. The plugin provides a filter that allows a 
+brand theme to register its instances of the `PMC\WP_Local_Data_CLI\Query_Args` 
+class.
 
 Consider this example:
 
