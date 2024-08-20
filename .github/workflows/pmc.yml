@@ -11,12 +11,12 @@ jobs:
     name: Coding Standards
     uses: penske-media-corp/github-workflows-wordpress/.github/workflows/coding-standards.yml@main
     secrets:
-      BITBUCKET_READ_ONLY_SSH_KEY: ${{ secrets.BITBUCKET_READ_ONLY_SSH_KEY }}
-      GITHUB_READ_ONLY_SSH_KEY: ${{ secrets.PMC_GITHUB_ACTION_SSH_KEY }}
+      BITBUCKET_READ_ONLY_SSH_KEY: ${{ secrets.BITBUCKET_READ_ONLY_SSH_KEY_PUBLIC_REPOS }}
+      GITHUB_READ_ONLY_SSH_KEY: ${{ secrets.PMC_GITHUB_ACTION_SSH_KEY_PUBLIC_REPOS }}
 
   linting:
     name: Linting
     uses: penske-media-corp/github-workflows-wordpress/.github/workflows/linting.yml@main
     secrets:
-      BITBUCKET_READ_ONLY_SSH_KEY: ${{ secrets.BITBUCKET_READ_ONLY_SSH_KEY }}
-      GITHUB_READ_ONLY_SSH_KEY: ${{ secrets.PMC_GITHUB_ACTION_SSH_KEY }}
+      BITBUCKET_READ_ONLY_SSH_KEY: ${{ secrets.BITBUCKET_READ_ONLY_SSH_KEY_PUBLIC_REPOS }}
+      GITHUB_READ_ONLY_SSH_KEY: ${{ secrets.PMC_GITHUB_ACTION_SSH_KEY_PUBLIC_REPOS }}
