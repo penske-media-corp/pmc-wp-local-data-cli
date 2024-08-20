@@ -11,8 +11,8 @@ for both built-in WordPress data structures as well as those found in Core Tech.
 Individual themes can provide their own handlers for brand-specific code.
 
 As this plugin is built to support PMC's architecture, it depends on parts of 
-our that are not represented in this plugin. We share it publicly to serve as a
-guide.
+our codebase that are not represented in this plugin. We share it publicly to 
+serve as a guide.
 
 ## Overview
 
