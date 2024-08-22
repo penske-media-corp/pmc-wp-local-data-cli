@@ -29,6 +29,7 @@ final class Clean_DB {
 	public function __construct() {
 		$this->_delete_posts();
 		$this->_clean_users_table();
+		$this->_clean_usermeta_table();
 		$this->_clean_comments_table();
 		$this->_change_admin_email();
 	}
@@ -168,6 +169,25 @@ final class Clean_DB {
 		WP_CLI::line( " * Removing PII from {$wpdb->users}." );
 
 		$wpdb->query( "UPDATE {$wpdb->users} SET user_email='localdev@pmcdev.local';" );
+	}
+
+	/**
+	 * Remove sensitive data from the usermeta table.
+	 *
+	 * @return void
+	 */
+	private function _clean_usermeta_table(): void {
+		global $wpdb;
+
+		WP_CLI::line( " * Removing PII from {$wpdb->usermeta}." );
+
+		// Session tokens include users' IP address.
+		$wpdb->query(
+			$wpdb->prepare(
+				"DELETE FROM {$wpdb->usermeta} WHERE meta_key = %s;",
+				'session_tokens'
+			)
+		);
 	}
 
 	/**
