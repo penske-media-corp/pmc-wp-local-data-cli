@@ -42,22 +42,26 @@ final class Init extends PMC_WP_CLI {
 	 * @return void
 	 */
 	public function start(): void {
-		WP_CLI::line( 'Starting local-data process.' );
+		try {
+			WP_CLI::line( 'Starting local-data process.' );
 
-		do_action( 'pmc_wp_cli_local_data_before_processing' );
+			do_action( 'pmc_wp_cli_local_data_before_processing' );
 
-		$this->_drop_table();
-		$this->_create_table();
+			$this->_drop_table();
+			$this->_create_table();
 
-		$this->_query_for_ids_to_keep();
+			$this->_query_for_ids_to_keep();
 
-		new Clean_DB();
+			new Clean_DB();
 
-		do_action( 'pmc_wp_cli_local_data_after_processing' );
+			do_action( 'pmc_wp_cli_local_data_after_processing' );
 
-		$this->_drop_table();
+			$this->_drop_table();
 
-		WP_CLI::line( 'Process complete.' );
+			WP_CLI::line( 'Process complete.' );
+		} catch ( Throwable $throwable ) {
+			$this->_handle_error( $throwable );
+		}
 	}
 
 	/**
@@ -229,5 +233,19 @@ final class Init extends PMC_WP_CLI {
 			static fn ( mixed $instance ): bool =>
 				$instance instanceof Query_Args
 		);
+	}
+
+	/**
+	 * Handle errors during trimming process.
+	 *
+	 * @param Throwable $throwable Error details.
+	 * @return void
+	 */
+	private function _handle_error( Throwable $throwable ): void {
+		global $wpdb;
+
+		$wpdb->query( 'DROP DATABASE ' . DB_NAME );
+
+		WP_CLI::error( $throwable->getMessage() );
 	}
 }
