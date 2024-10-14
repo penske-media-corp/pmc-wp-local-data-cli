@@ -11,6 +11,7 @@ namespace PMC\WP_Local_Data_CLI;
 
 use PMC\Global_Functions\Traits\Singleton;
 use PMC\Global_Functions\VIP_Go_Sync_Cleanup;
+use PMC\SSO\Utilities\JWT;
 use WP_CLI;
 use WP_User;
 
@@ -98,6 +99,12 @@ final class Customizations {
 		);
 
 		VIP_Go_Sync_Cleanup::get_instance()->do_cleanup();
+
+		/**
+		 * The JWT secret is not handled by the `VIP_Go_Sync_Cleanup` because
+		 * the value must be available to all non-production environments.
+		 */
+		delete_option( JWT::OPTION_NAME_SECRET );
 	}
 
 	/**
