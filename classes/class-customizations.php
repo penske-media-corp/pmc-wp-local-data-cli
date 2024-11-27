@@ -162,7 +162,7 @@ final class Customizations {
 			[
 				'user_login' => 'pmcdev',
 				'user_pass'  => 'pmcdev',
-				'user_email' => 'pmcdev@pmc.local',
+				'user_email' => 'pmcdev@' . LOCAL_DOMAIN,
 				'role'       => 'administrator',
 			]
 		);
