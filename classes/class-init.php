@@ -17,6 +17,8 @@ use PMC_WP_CLI;
 use Throwable;
 use WP_CLI;
 
+use function WP_CLI\Utils\get_flag_value;
+
 /**
  * Class Init.
  */
@@ -34,16 +36,36 @@ final class Init extends PMC_WP_CLI {
 	/**
 	 * Prepare production database for use in local-development environment.
 	 *
+	 *  ## OPTIONS
+	 *
+	 *  [--debug-mode]
+	 *  : Skip deletion step and retain table holding found IDs.
+	 *
 	 * ## EXAMPLES
 	 *     wp pmc-local-data start
+	 *     wp pmc-local-data start --debug-mode
 	 *
 	 * @subcommand start
 	 *
+	 * @param array $args       Positional arguments.
+	 * @param array $assoc_args Associative arguments.
 	 * @return void
 	 */
-	public function start(): void {
+	public function start( array $args, array $assoc_args ): void {
 		try {
+			$debug_mode = get_flag_value(
+				$assoc_args,
+				'debug-mode',
+				false
+			);
+
 			WP_CLI::line( 'Starting local-data process.' );
+
+			if ( $debug_mode ) {
+				WP_CLI::warning(
+					'Debug mode active: `Clean_DB` class will be skipped and IDs table will be retained.'
+				);
+			}
 
 			do_action( 'pmc_wp_cli_local_data_before_processing' );
 
@@ -52,11 +74,24 @@ final class Init extends PMC_WP_CLI {
 
 			$this->_query_for_ids_to_keep();
 
-			new Clean_DB();
+			if ( $debug_mode ) {
+				WP_CLI::warning( 'Debug mode active: skipping `Clean_DB` class.' );
+			} else {
+				new Clean_DB();
+			}
 
 			do_action( 'pmc_wp_cli_local_data_after_processing' );
 
-			$this->_drop_table();
+			if ( $debug_mode ) {
+				WP_CLI::warning(
+					sprintf(
+						'Debug mode active: retaining `%1$s` table.',
+						self::TABLE_NAME
+					)
+				);
+			} else {
+				$this->_drop_table();
+			}
 
 			WP_CLI::line( 'Process complete.' );
 		} catch ( Throwable $throwable ) {
