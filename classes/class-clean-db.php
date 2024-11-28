@@ -168,7 +168,29 @@ final class Clean_DB {
 
 		WP_CLI::line( " * Removing PII from {$wpdb->users}." );
 
-		$wpdb->query( "UPDATE {$wpdb->users} SET user_email='localdev@pmcdev.local';" );
+		foreach (
+			$wpdb->get_col( "SELECT ID FROM {$wpdb->users};" ) as $user_id
+		) {
+			$wpdb->update(
+				$wpdb->users,
+				[
+					'user_email' => sprintf(
+						'user-%1$d@%2$s',
+						$user_id,
+						LOCAL_DOMAIN
+					),
+				],
+				[
+					'ID' => $user_id,
+				],
+				[
+					'user_email' => '%s',
+				],
+				[
+					'ID' => '%d',
+				]
+			);
+		}
 	}
 
 	/**
@@ -200,7 +222,12 @@ final class Clean_DB {
 
 		WP_CLI::line( " * Removing PII from {$wpdb->comments}." );
 
-		$wpdb->query( "UPDATE {$wpdb->comments} SET comment_author_email='commenter@pmcdev.local', comment_author_IP='', comment_agent='';" );
+		$wpdb->query(
+			$wpdb->prepare(
+				"UPDATE {$wpdb->comments} SET comment_author_email=%s, comment_author_IP='', comment_agent='';",
+				'commenter@' . LOCAL_DOMAIN
+			)
+		);
 	}
 
 	/**
@@ -211,7 +238,10 @@ final class Clean_DB {
 	private function _change_admin_email(): void {
 		WP_CLI::line( ' * Overwriting `admin_email` option.' );
 
-		update_option( 'admin_email', 'admin@pmcdev.local' );
+		update_option(
+			'admin_email',
+			'admin@' . LOCAL_DOMAIN
+		);
 		delete_option( 'new_admin_email' );
 	}
 }

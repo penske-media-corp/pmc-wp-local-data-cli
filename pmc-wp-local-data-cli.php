@@ -21,6 +21,11 @@ if ( ! defined( 'WP_CLI' ) || ! WP_CLI ) {
 	return;
 }
 
+/**
+ * Domain used in various replacements.
+ */
+const LOCAL_DOMAIN = 'pmcdev.local';
+
 require_once __DIR__ . '/dependencies.php';
 require_once __DIR__ . '/autoloader.php';
 
