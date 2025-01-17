@@ -14,6 +14,7 @@ use PMC\WP_Local_Data_CLI\Query_Args;
 /**
  * Class bbPress.
  */
+// phpcs:ignore PEAR.NamingConventions.ValidClassName.StartWithCapital, Squiz.Commenting.ClassComment.Missing
 final class bbPress extends Query_Args {
 	/**
 	 * Backfill is not required as we query from replies and use their meta to
@@ -65,14 +66,14 @@ final class bbPress extends Query_Args {
 
 		$parent_ids = array_filter(
 			[
-				get_post_meta( $id, '_bbp_topic_id', true ),
-				get_post_meta( $id, '_bbp_forum_id', true ),
+				(int) get_post_meta( $id, '_bbp_topic_id', true ),
+				(int) get_post_meta( $id, '_bbp_forum_id', true ),
 			]
 		);
 
 		foreach ( $parent_ids as $parent_id ) {
 			$ids[] = [
-				'ID'        => (int) $parent_id,
+				'ID'        => $parent_id,
 				'post_type' => get_post_type( $parent_id ),
 			];
 		}
