@@ -64,17 +64,17 @@ final class bbPress extends Query_Args {
 	public static function get_linked_ids( int $id, string $post_type ): array {
 		$ids = [];
 
-		$parent_ids = array_filter(
+		$ancestors = array_filter(
 			[
 				(int) get_post_meta( $id, '_bbp_topic_id', true ),
 				(int) get_post_meta( $id, '_bbp_forum_id', true ),
 			]
 		);
 
-		foreach ( $parent_ids as $parent_id ) {
+		foreach ( $ancestors as $ancestor ) {
 			$ids[] = [
-				'ID'        => $parent_id,
-				'post_type' => get_post_type( $parent_id ),
+				'ID'        => $ancestor,
+				'post_type' => get_post_type( $ancestor ),
 			];
 		}
 
