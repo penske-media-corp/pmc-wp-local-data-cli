@@ -98,7 +98,7 @@ final class Query {
 
 		do {
 			foreach ( $query->posts as $id ) {
-				$this->_write_id_to_db( $id, $query_args['post_type'] );
+				$this->_write_id_to_db( $id, get_post_type( $id ) );
 
 				if ( has_blocks( $id ) ) {
 					$ids = ( new Gutenberg( $id ) )->get_ids();
@@ -115,7 +115,7 @@ final class Query {
 				}
 
 				foreach (
-					$callback( $id, $query_args['post_type'] ) as $entry
+					$callback( $id, get_post_type( $id ) ) as $entry
 				) {
 					$this->_write_id_to_db( $entry['ID'], $entry['post_type'] );
 				}
