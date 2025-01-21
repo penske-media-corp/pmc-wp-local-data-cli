@@ -213,6 +213,7 @@ final class Init extends PMC_WP_CLI {
 	 */
 	private function _get_query_args_instances(): array {
 		$query_args = [
+			new Query_Args\bbPress(),
 			new Query_Args\CoAuthors_Plus(),
 			new Query_Args\Nav_Menu_Item(),
 			new Query_Args\OEmbed_Cache(),
