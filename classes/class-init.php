@@ -239,6 +239,7 @@ final class Init extends PMC_WP_CLI {
 			// new Query_Args\PMC_Publication_Issue(),
 			new Query_Args\PMC_Reviews(),
 			new Query_Args\PMC_Store_Products(),
+			new Query_Args\PMC_Templatized_Widgets(),
 			new Query_Args\PMC_Term_Content(),
 			new Query_Args\PMC_TOC(),
 			new Query_Args\PMC_Top_Video(),
