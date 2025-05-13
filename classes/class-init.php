@@ -94,6 +94,7 @@ final class Init extends PMC_WP_CLI {
 			}
 
 			WP_CLI::line( 'Process complete.' );
+			exit( 0 );
 		} catch ( Throwable $throwable ) {
 			$this->_handle_error( $throwable );
 		}
