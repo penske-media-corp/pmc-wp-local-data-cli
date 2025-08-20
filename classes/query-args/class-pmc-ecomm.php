@@ -41,16 +41,31 @@ final class PMC_Ecomm extends Query_Args {
 	public static function get_query_args(): array {
 		$term = Disclaimer::get_instance()->get_post_option();
 
+		if (
+			empty( $term['slug'] )
+			|| ! term_exists( $term['slug'], Taxonomy::NAME )
+		) {
+			return [
+				'post_type'  => 'abcdef0123456789',
+				'date_query' => [
+					[
+						'after' => '+500 years',
+					],
+				],
+			];
+		}
+
 		return [
-			'post_type'  => 'any',
-			'date_query' => [
+			'post_status' => 'publish',
+			'post_type'   => 'post',
+			'date_query'  => [
 				[
 					'after' => '-3 months',
 				],
 			],
 			// Used in CLI context.
 			// phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_tax_query
-			'tax_query'  => [
+			'tax_query'   => [
 				[
 					'taxonomy' => Taxonomy::NAME,
 					'field'    => 'slug',
