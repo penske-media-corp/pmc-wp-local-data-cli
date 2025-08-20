@@ -74,7 +74,7 @@ final class Query {
 	): void {
 		$query_args = wp_parse_args(
 			[
-				'cache_results'          => true,
+				'cache_results'          => false,
 				'fields'                 => 'ids',
 				'ignore_sticky_posts'    => true,
 				'lazy_load_term_meta'    => false,

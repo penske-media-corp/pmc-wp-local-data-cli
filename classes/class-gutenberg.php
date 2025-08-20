@@ -230,7 +230,8 @@ final class Gutenberg {
 				explode(
 					'.',
 					array_shift( $parts )
-				)
+				),
+				[]
 			);
 
 			if ( empty( $parts ) ) {
