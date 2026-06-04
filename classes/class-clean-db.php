@@ -16,7 +16,6 @@ declare( strict_types = 1 );
 namespace PMC\WP_Local_Data_CLI;
 
 use WP_CLI;
-use WP_Post;
 use WPCOM_VIP_Cache_Manager;
 
 /**
@@ -92,18 +91,13 @@ final class Clean_DB {
 				)
 			);
 
-			foreach ( $ids as $id_to_delete ) {
-				$deleted = wp_delete_post( $id_to_delete, true );
+			$ids_in = implode( ',', array_map( 'intval', $ids ) );
 
-				if ( ! $deleted instanceof WP_Post ) {
-					WP_CLI::warning(
-						sprintf(
-							'     - Failed to delete post ID `%1$d`',
-							$id_to_delete
-						)
-					);
-				}
-			}
+			$wpdb->query( "DELETE FROM `{$wpdb->postmeta}` WHERE post_id IN ({$ids_in})" );
+			$wpdb->query( "DELETE FROM `{$wpdb->term_relationships}` WHERE object_id IN ({$ids_in})" );
+			$wpdb->query( "DELETE FROM `{$wpdb->commentmeta}` WHERE comment_id IN ( SELECT comment_ID FROM `{$wpdb->comments}` WHERE post_id IN ({$ids_in}) )" );
+			$wpdb->query( "DELETE FROM `{$wpdb->comments}` WHERE post_id IN ({$ids_in})" );
+			$wpdb->query( "DELETE FROM `{$wpdb->posts}` WHERE ID IN ({$ids_in})" );
 
 			$this->_free_resources();
 
@@ -168,29 +162,12 @@ final class Clean_DB {
 
 		WP_CLI::line( " * Removing PII from {$wpdb->users}." );
 
-		foreach (
-			$wpdb->get_col( "SELECT ID FROM {$wpdb->users};" ) as $user_id
-		) {
-			$wpdb->update(
-				$wpdb->users,
-				[
-					'user_email' => sprintf(
-						'user-%1$d@%2$s',
-						$user_id,
-						LOCAL_DOMAIN
-					),
-				],
-				[
-					'ID' => $user_id,
-				],
-				[
-					'user_email' => '%s',
-				],
-				[
-					'ID' => '%d',
-				]
-			);
-		}
+		$wpdb->query(
+			$wpdb->prepare(
+				"UPDATE `{$wpdb->users}` SET user_email = CONCAT('user-', ID, '@', %s)",
+				LOCAL_DOMAIN
+			)
+		);
 	}
 
 	/**
