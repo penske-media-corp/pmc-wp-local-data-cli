@@ -96,7 +96,8 @@ final class Clean_DB {
 			$wpdb->query( "DELETE FROM `{$wpdb->postmeta}` WHERE post_id IN ({$ids_in})" );
 			$wpdb->query( "DELETE FROM `{$wpdb->term_relationships}` WHERE object_id IN ({$ids_in})" );
 			$wpdb->query(
-				"DELETE FROM `{$wpdb->commentmeta}` WHERE comment_id IN ( SELECT comment_ID FROM `{$wpdb->comments}` WHERE post_id IN ({$ids_in}) )"
+				"DELETE FROM `{$wpdb->commentmeta}` WHERE comment_id IN"
+				. " ( SELECT comment_ID FROM `{$wpdb->comments}` WHERE post_id IN ({$ids_in}) )"
 			);
 			$wpdb->query( "DELETE FROM `{$wpdb->comments}` WHERE post_id IN ({$ids_in})" );
 			$wpdb->query( "DELETE FROM `{$wpdb->posts}` WHERE ID IN ({$ids_in})" );
