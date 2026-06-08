@@ -170,7 +170,7 @@ final class Query {
 
 		$table = Init::TABLE_NAME;
 		// phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared
-		$sql   = 'INSERT IGNORE INTO ' . $table . ' (ID, post_type) VALUES '
+		$sql = 'INSERT IGNORE INTO ' . $table . ' (ID, post_type) VALUES '
 				. implode( ', ', $placeholders );
 
 		$wpdb->query( // phpcs:ignore WordPress.DB.PreparedSQLPlaceholders.ReplacementsWrongNumber
