@@ -99,7 +99,10 @@ final class Query {
 
 		do {
 			foreach ( $query->posts as $id ) {
-				$buffer[] = [ 'ID' => $id, 'post_type' => get_post_type( $id ) ];
+				$buffer[] = [
+				'ID'        => $id,
+				'post_type' => get_post_type( $id ),
+			];
 
 				if ( has_blocks( $id ) ) {
 					$ids = ( new Gutenberg( $id ) )->get_ids();
@@ -140,7 +143,7 @@ final class Query {
 	private function _flush_buffer( array $buffer ): void {
 		global $wpdb;
 
-		$rows        = [];
+		$rows         = [];
 		$placeholders = [];
 
 		foreach ( $buffer as $entry ) {
@@ -165,12 +168,12 @@ final class Query {
 			return;
 		}
 
-		$wpdb->query(
-			$wpdb->prepare(
-				'INSERT IGNORE INTO ' . Init::TABLE_NAME . ' (ID, post_type) VALUES '
-				. implode( ', ', $placeholders ),
-				...$rows
-			)
+		$table = Init::TABLE_NAME;
+		$sql   = 'INSERT IGNORE INTO ' . $table . ' (ID, post_type) VALUES ' // phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared
+			. implode( ', ', $placeholders );
+
+		$wpdb->query( // phpcs:ignore WordPress.DB.PreparedSQLPlaceholders.ReplacementsWrongNumber
+			$wpdb->prepare( $sql, ...$rows ) // phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared
 		);
 	}
 }
