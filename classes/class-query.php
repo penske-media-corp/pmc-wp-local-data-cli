@@ -94,67 +94,87 @@ final class Query {
 			$args
 		);
 
-		$query = new WP_Query( $query_args );
+		$buffer = [];
+		$query  = new WP_Query( $query_args );
 
 		do {
 			foreach ( $query->posts as $id ) {
-				$this->_write_id_to_db( $id, get_post_type( $id ) );
+				$buffer[] = [
+					'ID'        => $id,
+					'post_type' => get_post_type( $id ),
+				];
 
 				if ( has_blocks( $id ) ) {
 					$ids = ( new Gutenberg( $id ) )->get_ids();
 					foreach ( $ids as $gutenberg_id ) {
-						$this->_write_id_to_db(
-							$gutenberg_id['ID'],
-							$gutenberg_id['post_type']
-						);
+						$buffer[] = $gutenberg_id;
 					}
 				}
 
-				if ( null === $callback ) {
-					continue;
+				if ( null !== $callback ) {
+					foreach (
+						$callback( $id, get_post_type( $id ) ) as $entry
+					) {
+						$buffer[] = $entry;
+					}
 				}
 
-				foreach (
-					$callback( $id, get_post_type( $id ) ) as $entry
-				) {
-					$this->_write_id_to_db( $entry['ID'], $entry['post_type'] );
+				if ( count( $buffer ) >= 500 ) {
+					$this->_flush_buffer( $buffer );
+					$buffer = [];
 				}
 			}
 
 			$query_args['paged']++;
 			$query = new WP_Query( $query_args );
 		} while ( $query->have_posts() );
+
+		if ( ! empty( $buffer ) ) {
+			$this->_flush_buffer( $buffer );
+		}
 	}
 
 	/**
-	 * Save to custom database table the post IDs to retain.
+	 * Flush a buffer of ID/post_type pairs to the keep table in one INSERT.
 	 *
-	 * @param int    $id        Post ID.
-	 * @param string $post_type Post type.
+	 * @param array $buffer Array of ['ID' => int, 'post_type' => string].
 	 * @return void
 	 */
-	private function _write_id_to_db( int $id, string $post_type ): void {
+	private function _flush_buffer( array $buffer ): void {
 		global $wpdb;
 
-		if ( 'any' === $post_type ) {
-			$post_type = get_post_type( $id );
+		$rows         = [];
+		$placeholders = [];
+
+		foreach ( $buffer as $entry ) {
+			$id        = (int) $entry['ID'];
+			$post_type = $entry['post_type'];
+
+			if ( 'any' === $post_type ) {
+				$post_type = get_post_type( $id );
+			}
+
+			// TODO: how do we end up with empty `post_type`?
+			if ( empty( $id ) || empty( $post_type ) ) {
+				continue;
+			}
+
+			$rows[]         = $id;
+			$rows[]         = $post_type;
+			$placeholders[] = '(%d, %s)';
 		}
 
-		// TODO: how do we end up with empty `post_type`?
-		if ( empty( $id ) || empty( $post_type ) ) {
+		if ( empty( $placeholders ) ) {
 			return;
 		}
 
-		$wpdb->insert(
-			Init::TABLE_NAME,
-			[
-				'ID'        => $id,
-				'post_type' => $post_type,
-			],
-			[
-				'ID'        => '%d',
-				'post_type' => '%s',
-			]
+		$table = Init::TABLE_NAME;
+		// phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared
+		$sql = 'INSERT IGNORE INTO ' . $table . ' (ID, post_type) VALUES '
+				. implode( ', ', $placeholders );
+
+		$wpdb->query( // phpcs:ignore WordPress.DB.PreparedSQLPlaceholders.ReplacementsWrongNumber
+			$wpdb->prepare( $sql, ...$rows ) // phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared
 		);
 	}
 }
