@@ -106,9 +106,9 @@ final class Clean_DB {
 			$wpdb->query( "DELETE FROM `{$wpdb->term_relationships}` WHERE object_id IN ({$ids_in})" );
 			$wpdb->query(
 				"DELETE FROM `{$wpdb->commentmeta}` WHERE comment_id IN"
-				. " ( SELECT comment_ID FROM `{$wpdb->comments}` WHERE post_id IN ({$ids_in}) )"
+				. " ( SELECT comment_ID FROM `{$wpdb->comments}` WHERE comment_post_ID IN ({$ids_in}) )"
 			);
-			$wpdb->query( "DELETE FROM `{$wpdb->comments}` WHERE post_id IN ({$ids_in})" );
+			$wpdb->query( "DELETE FROM `{$wpdb->comments}` WHERE comment_post_ID IN ({$ids_in})" );
 			$wpdb->query( "DELETE FROM `{$wpdb->posts}` WHERE ID IN ({$ids_in})" );
 
 			$this->_free_resources();
@@ -150,15 +150,19 @@ final class Clean_DB {
 		// PRIMARY key directly and measured ~0.3s per batch (~6x faster) with an
 		// identical result set. `OFFSET` is always 0 because deleted rows leave the
 		// window each batch, so we only ever need the first `LIMIT` rows.
+		// Intentionally using complex placeholders to prevent incorrect quoting of table names.
+		// phpcs:disable WordPress.DB.PreparedSQLPlaceholders.UnquotedComplexPlaceholder
 		return $wpdb->prepare(
-			// Intentionally using complex placeholders to prevent incorrect quoting of table names.
-			// phpcs:ignore WordPress.DB.PreparedSQLPlaceholders.UnquotedComplexPlaceholder
-			'SELECT p.ID FROM `%1$s` p LEFT JOIN `%2$s` k ON p.ID = k.ID WHERE k.ID IS NULL AND p.post_type != \'revision\' ORDER BY p.ID ASC LIMIT %3$d,%4$d',
+			'SELECT p.ID FROM `%1$s` p'
+			. ' LEFT JOIN `%2$s` k ON p.ID = k.ID'
+			. ' WHERE k.ID IS NULL AND p.post_type != \'revision\''
+			. ' ORDER BY p.ID ASC LIMIT %3$d,%4$d',
 			$wpdb->posts,
 			Init::TABLE_NAME,
 			0,
 			$per_page
 		);
+		// phpcs:enable WordPress.DB.PreparedSQLPlaceholders.UnquotedComplexPlaceholder
 	}
 
 	/**
