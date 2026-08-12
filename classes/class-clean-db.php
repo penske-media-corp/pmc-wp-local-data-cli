@@ -54,6 +54,7 @@ final class Clean_DB {
 
 		$page     = 0;
 		$per_page = 500;
+		$last_id  = 0;
 
 		$total_ids     = $wpdb->get_var(
 			"SELECT COUNT(ID) FROM `{$wpdb->posts}` WHERE post_type != 'revision'"
@@ -75,8 +76,12 @@ final class Clean_DB {
 		$this->_defer_counts( true );
 
 		while (
-			$ids = $wpdb->get_col( $this->_get_delete_query( $per_page ) )
+			$ids = $wpdb->get_col( $this->_get_delete_query( $per_page, $last_id ) )
 		) {
+			// Keyset cursor: the query returns IDs strictly greater than
+			// $last_id in ascending order, so the max of this batch is where
+			// the next batch resumes. See _get_delete_query() for why.
+			$last_id = (int) end( $ids );
 			if ( $page > ( $total_batches * 1.25 ) ) {
 				WP_CLI::warning(
 					sprintf(
@@ -137,9 +142,10 @@ final class Clean_DB {
 	 * Build query to create list of IDs to check against list to retain.
 	 *
 	 * @param int $per_page IDs per page.
+	 * @param int $last_id  Highest ID processed so far; the keyset cursor.
 	 * @return string
 	 */
-	private function _get_delete_query( int $per_page ): string {
+	private function _get_delete_query( int $per_page, int $last_id ): string {
 		global $wpdb;
 
 		// Anti-join (`LEFT JOIN ... IS NULL`) instead of `NOT IN ( SELECT ... )`.
@@ -148,18 +154,27 @@ final class Clean_DB {
 		// that materialized set to an on-disk temp table each batch ("converting
 		// HEAP to ondisk"), at ~1.8s per batch. The anti-join uses the keep-table's
 		// PRIMARY key directly and measured ~0.3s per batch (~6x faster) with an
-		// identical result set. `OFFSET` is always 0 because deleted rows leave the
-		// window each batch, so we only ever need the first `LIMIT` rows.
+		// identical result set.
+		//
+		// Keyset pagination (`p.ID > %3$d`) instead of `LIMIT offset,n`. Because
+		// the keep-rows are never deleted, an `OFFSET 0` scan must re-traverse the
+		// entire (growing) keep-prefix from the front of `wp_posts` every batch to
+		// reach the next deletable row. On a large brand that prefix grew to ~289K
+		// rows and the selection query degraded to ~100s per batch at the tail. A
+		// high-water-mark cursor on the PRIMARY key range-scans forward from the
+		// last ID seen instead, so each batch is O(per_page) regardless of how many
+		// keep-rows precede it. IDs are processed strictly ascending and never
+		// revisited, so the result set is identical.
 		// Intentionally using complex placeholders to prevent incorrect quoting of table names.
 		// phpcs:disable WordPress.DB.PreparedSQLPlaceholders.UnquotedComplexPlaceholder
 		return $wpdb->prepare(
 			'SELECT p.ID FROM `%1$s` p'
 			. ' LEFT JOIN `%2$s` k ON p.ID = k.ID'
-			. ' WHERE k.ID IS NULL AND p.post_type != \'revision\''
-			. ' ORDER BY p.ID ASC LIMIT %3$d,%4$d',
+			. ' WHERE p.ID > %3$d AND k.ID IS NULL AND p.post_type != \'revision\''
+			. ' ORDER BY p.ID ASC LIMIT %4$d',
 			$wpdb->posts,
 			Init::TABLE_NAME,
-			0,
+			$last_id,
 			$per_page
 		);
 		// phpcs:enable WordPress.DB.PreparedSQLPlaceholders.UnquotedComplexPlaceholder
